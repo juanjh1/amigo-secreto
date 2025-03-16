@@ -1,25 +1,36 @@
-// El principal objetivo de este desafío es fortalecer tus habilidades en lógica de programación. Aquí deberás desarrollar la lógica para resolver el problema.
+
 const amistades = document.getElementById("amigo");
-const listaForUpgrade = document.getElementById("listaAmigos");// anglo español --> need changes 
-const winerContainer = document.getElementById("resultado"); // ???
+const listaForUpgrade = document.getElementById("listaAmigos");
+const winerContainer = document.getElementById("resultado"); 
 const buttonComment = document.getElementById("button-message");
 const aletContainer = document.getElementById("alert-container");
 const inputContainer = document.getElementById("input-container")
 const describeTitle = document.getElementById("describe-title")
-let amigos = []; // strings 
+let amigos = [];
 let statusMap = new Map();
 statusMap.set("ForPLay", 0)
 statusMap.set("played", 1)
 let currentStatus = 0
 
 
-// parece funcionar
+const addNewLi = (element) =>{
+    return `<li style="background-color: #4B69FD; color: white; justify-content: space-between;">
+            <span style="padding-right: 48%;">${element}</span>
+            <span style="color:#4B69FD ; cursor: pointer; background-color:white; font-size: 20px; border-radius: 2px; padding: 4px;" onclick="deleteFriend(this)">    x</span>
+            </li>`
+}
+
 const toPascalcase = (string) => {
     return  string.split("").map(  (c , i)  => {return i == 0 ? c.toUpperCase() : c.toLowerCase() } ).join("")
 }
 
-const CreateMessage = (message) => {
 
+const normalizeString = (str) => {
+
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  };
+
+const CreateMessage = (message) => {
     return `
             <div class="alert alert-primary d-flex align-items-center" role="alert" style="height:max-content; margin: 0px;">
                 <svg xmlns="http://www.w3.org/2000/svg" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"  viewBox="0 0 16 16" role="img" aria-label="Warning:" style="width: 20px;">
@@ -29,8 +40,7 @@ const CreateMessage = (message) => {
                   ${message}
                 </div>
                  <span style="color: brown;cursor: pointer; font-size: 25px; font-weight: bold;" onclick="cerrarNotificaion(this)">x</span> <!-- i can use this in this context????-->
-            </div>
-            `
+            </div> `
 }
 
 const cerrarNotificaion = (element)=>{
@@ -40,55 +50,44 @@ const cerrarNotificaion = (element)=>{
 
 
 const deleteFriend = (friend)=>{
-    console.log( friend.parentElement.innerText)
-
     amigos = amigos.filter((f)  => f.toLowerCase() != friend.parentElement.innerText.toLowerCase().split(" ")[0])
     friend.parentElement.remove(); 
 
 }
+
 document.getElementById('amigo').addEventListener('keypress', function(event) {
     if (event.key === 'Enter') {
-        event.preventDefault(); // Evita que el formulario se envíe automáticamente
+        event.preventDefault(); 
         agregarAmigo()
     }
 });
 
 function agregarAmigo()
 {
-    if(amistades.value.length == 0){  aletContainer.innerHTML += CreateMessage("El nombre no puede estar vacio");}// length == 0 = value == ""
+    if(amistades.value.length == 0){  aletContainer.innerHTML += CreateMessage("El nombre no puede estar vacio");}
     else
     {   
         if(/^[\p{Ll}\p{Lu}]+$/u.test(amistades.value)){
             let itsUniq = true;
             amigos.forEach(element => {
-                if (element.toLowerCase() == amistades.value.toLowerCase()){
+                if (normalizeString(element) == normalizeString(amistades.value)){
                     itsUniq = false;
                 }
             });
-            //??? -- mala gestion de los booleanos 
             if(itsUniq || amigos.length == 0 ){
 
                 amigos.push(toPascalcase(amistades.value));
                 listaForUpgrade.innerHTML = ""
                 amigos.forEach(element => {
-    
-                    listaForUpgrade.innerHTML += ` 
-                    <li style="background-color: #4B69FD; color: white; justify-content: space-between;">
-                    <span style="padding-right: 48%;">${element}</span>
-                    <span style="color:#4B69FD ; cursor: pointer; background-color:white; font-size: 20px; border-radius: 2px; padding: 4px;" onclick="deleteFriend(this)">    x</span>
-                    </li>
-                    `; 
+                    listaForUpgrade.innerHTML += addNewLi(element); 
                 });
             }else{
                aletContainer.innerHTML += CreateMessage("El nombre debe ser unico");
             }        
         }else{
-            //cambiar esta chimbada por un modal(No se hacer un modal xd)
             aletContainer.innerHTML += CreateMessage("El Nombre solo puede contener caracteres");
-        }
-        
+        }      
         amistades.value = "";
-        console.log(amigos);
     }
 }
 
@@ -99,33 +98,29 @@ const sortearAmigo = () => {
     if(currentStatus == statusMap.get("ForPLay")){
         if(amigos.length >= 2 ){
             listaForUpgrade.innerHTML = "";
-            //console.log(Math.floor(Math.random() * amigos.length- 1))//it should be normalized ? // undefined // i forget round
             let randomNumber = Math.floor(Math.random() * amigos.length)
             winerContainer.innerHTML = `${amigos[randomNumber]}`;
             amigos = [];
             buttonComment.innerHTML = "Volver a empezar"
             inputContainer.style.display = "none"
             describeTitle.innerText = "🎉 Felicidades has sido elegido 🎉"
-            currentStatus = 1; // this is hardcode 
+            currentStatus = 1; 
             
 
         }else{
             aletContainer.innerHTML += CreateMessage("Necesitas mas de un amigo en la lista");
         }
     }
-    // debug this
+
     else if(currentStatus == statusMap.get("played")){
         winerContainer.innerHTML = "";
-        // why dont change of status?
         inputContainer.style.display = "flex"
-        buttonComment.innerHTML = "Sortear amigo";// change
+        buttonComment.innerHTML = "Sortear amigo";
         describeTitle.innerText = "Digite el nombre de sus amigos"
         currentStatus = 0; 
-       
-
     }
 
-    console.log(currentStatus)
+
 
     
    
